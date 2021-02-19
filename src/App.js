@@ -1,24 +1,65 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect, useRef } from "react";
+import "./App.css";
 
 function App() {
+  const [task, setTask] = useState("");
+  const [list, setList] = useState([]);
+  // const [empty, setEmpty] = useState();
+
+  const addTask = (e) => {
+    e.preventDefault();
+
+    const todo = { id: new Date().getTime().toString(), task };
+
+    if (task) {
+      setList((old) => {
+        return [...old, todo];
+      });
+      setTask("");
+    } else {
+      console.log("empty");
+    }
+  };
+
+  const removeItem = (id) => {
+    setList(list.filter((item) => item.id !== id));
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <section>
+      <h2>todo list</h2>
+      <form onSubmit={addTask}>
+        <div className="form-control">
+          <input
+            className="task-input"
+            type="text"
+            value={task}
+            onChange={(e) => setTask(e.target.value)}
+          />
+          <button className="add-btn">add</button>
+        </div>
+      </form>
+
+      {list.map(({ id, task }) => {
+        return (
+          <article key={id}>
+            <div className="task-div">
+              <p>{task}</p>
+              <button
+                className="remove-item-btn"
+                onClick={() => removeItem(id)}
+              >
+                clear
+              </button>
+            </div>
+          </article>
+        );
+      })}
+
+      <button className="clear-all-btn" onClick={() => setList([])}>
+        clear all
+      </button>
+    </section>
   );
 }
 
