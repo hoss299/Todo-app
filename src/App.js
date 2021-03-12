@@ -2,40 +2,40 @@ import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 
 function App() {
-  const [task, setTask] = useState("");
+  const refInput = useRef(null);
   const [list, setList] = useState([]);
   // const [empty, setEmpty] = useState();
 
   const addTask = (e) => {
     e.preventDefault();
-
+    const task = refInput.current.value;
     const todo = { id: new Date().getTime().toString(), task };
 
     if (task) {
       setList((old) => {
         return [...old, todo];
       });
-      setTask("");
     } else {
       console.log("empty");
     }
+    refInput.current.value = "";
+    refInput.current.focus();
   };
 
   const removeItem = (id) => {
     setList(list.filter((item) => item.id !== id));
   };
 
+  useEffect(() => {
+    refInput.current.focus();
+  });
+
   return (
     <section>
       <h2>todo list</h2>
       <form onSubmit={addTask}>
         <div className="form-control">
-          <input
-            className="task-input"
-            type="text"
-            value={task}
-            onChange={(e) => setTask(e.target.value)}
-          />
+          <input className="task-input" type="text" ref={refInput} />
           <button className="add-btn">add</button>
         </div>
       </form>
