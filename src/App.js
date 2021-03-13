@@ -1,53 +1,67 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useReducer } from "react";
 import "./App.css";
+import { reducer } from "./reducer";
+import Modal from "./Modal";
+
+const defaultState = {
+  list: [],
+  isModalOpen: false,
+  modalContent: "",
+};
 
 function App() {
-  const refInput = useRef(null);
-  const [list, setList] = useState([]);
+  const [task, setTask] = useState("");
+  const [state, dispatch] = useReducer(reducer, defaultState);
   // const [empty, setEmpty] = useState();
 
-  const addTask = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const task = refInput.current.value;
-    const todo = { id: new Date().getTime().toString(), task };
 
     if (task) {
-      setList((old) => {
-        return [...old, todo];
-      });
+      const newTask = { id: new Date().getTime().toString(), task };
+      dispatch({ type: "ADD_TASK", payload: newTask });
+      setTask("");
     } else {
-      console.log("empty");
+      dispatch({ type: "EMPTY_ENTRY" });
     }
-    refInput.current.value = "";
-    refInput.current.focus();
   };
 
-  const removeItem = (id) => {
-    setList(list.filter((item) => item.id !== id));
+  const closeModal = () => {
+    dispatch({ type: "CLOSE_MODAL" });
   };
 
-  useEffect(() => {
-    refInput.current.focus();
-  });
+  // useEffect(() => {
+  //   refInput.current.focus();
+  // });
 
   return (
     <section>
       <h2>todo list</h2>
-      <form onSubmit={addTask}>
+      {state.isModalOpen && (
+        <Modal closeModal={closeModal} modalContent={state.modalContent} />
+      )}
+      <form onSubmit={handleSubmit}>
         <div className="form-control">
-          <input className="task-input" type="text" ref={refInput} />
-          <button className="add-btn">add</button>
+          <input
+            className="task-input"
+            type="text"
+            value={task}
+            onChange={(e) => setTask(e.target.value)}
+          />
+          <button type="submit" className="add-btn">
+            add
+          </button>
         </div>
       </form>
 
-      {list.map(({ id, task }) => {
+      {state.list.map(({ id, task }) => {
         return (
           <article key={id}>
             <div className="task-div">
               <p>{task}</p>
               <button
                 className="remove-item-btn"
-                onClick={() => removeItem(id)}
+                onClick={() => dispatch({ type: "REMOVE_TASK", payload: id })}
               >
                 clear
               </button>
@@ -56,7 +70,10 @@ function App() {
         );
       })}
 
-      <button className="clear-all-btn" onClick={() => setList([])}>
+      <button
+        className="clear-all-btn"
+        onClick={() => dispatch({ type: "REMOVE_ALL" })}
+      >
         clear all
       </button>
     </section>
